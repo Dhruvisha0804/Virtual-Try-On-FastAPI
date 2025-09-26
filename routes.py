@@ -106,9 +106,26 @@ async def upload_product(request: Request, file: UploadFile = File(...), db=Depe
                 output_path = os.path.join("static/generated", gen_img_name)
                 output_img.save(output_path)
 
-            usage = getattr(response, "UsageMetadata", None)
-            prompt_tokens = getattr(response, "promptTokenCount", None)
-            candidates_tokens = getattr(response, "candidatesTokenCount", None)
+            # usage = getattr(response, "UsageMetadata", None)
+            # prompt_tokens = getattr(response, "promptTokenCount", None)
+            # candidates_tokens = getattr(response, "candidatesTokenCount", None)
+
+            usage = response.usage_metadata
+
+            # Total tokens
+            prompt_tokens = usage.prompt_token_count
+            candidates_tokens = usage.candidates_token_count
+
+            # Split by modality
+            text_tokens = 0
+            image_tokens = 0
+
+            if usage.prompt_tokens_details:
+                for detail in usage.prompt_tokens_details:
+                    if detail.modlity == "TEXT":
+                        text_tokens = detail.token_count
+                    elif detail.modality == "IMAGE":
+                        image_tokens = detail.token_count
 
             res_generated_time = datetime.now()
 
@@ -127,7 +144,9 @@ async def upload_product(request: Request, file: UploadFile = File(...), db=Depe
             return JSONResponse({
                 "generated_img": f"/static/generated/{gen_img_name}",
                 "prompt": prompt,
-                "prompt_tokens": prompt_tokens,
+                "prompt_tokens_total": prompt_tokens,
+                "prompt_tokens_text": text_tokens,
+                "prompt_tokens_image": image_tokens,
                 "generated_tokens": candidates_tokens,
                 "message": "Generated successfully." if success else f"Generated but DB error: {msg}"
             })
@@ -153,5 +172,3 @@ async def feedback(payload: FeedbackRequest, request: Request):
 
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
-
-

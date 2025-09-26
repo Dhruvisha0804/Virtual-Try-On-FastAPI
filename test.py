@@ -40,7 +40,7 @@ if image_response and image_response.images:
     print("\nFull metadata from GEMINI response:")
     print(image_response.__dict__)
 
-    usage = getattr(image_response, "UsageMetadat", None)
+    usage = getattr(image_response, "UsageMetadata", None)
 
     prompt_tokens = getattr(usage, "promptTokenCount", None)
     candidates_tokens = getattr(usage, "candidatesTokenCount", None)

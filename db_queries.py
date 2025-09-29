@@ -1,36 +1,22 @@
 def insert_vto_tokens(
-        conn,
-        user_id,
-        username,
-        req_received_time,
-        res_generated_time,
-        prompt_tokens=0,
-        input_img_tokens=0,
-        gen_img_name=None,
-        gen_img_used_tokens=0
+    conn, user_id, username, req_received_time, res_generated_time,
+    response_id, input_prompt, text_tokens, image_tokens,
+    prompt_tokens_total, revised_prompt, candidates_tokens, output_texts
 ):
-
     try:
         cursor = conn.cursor()
-
-        # user_id = 'dhruvisha19'
-        # username = 'Dhruvisha Jaiswal'
-
-        # user_id = user_id if user_id is not None else 'dhruvisha19'
-        # username = username if username is not None else 'Dhruvisha Jaiswal'
-
         cursor.execute("""
-            insert into vto_tokens (user_id, username, req_received_time, prompt_tokens, input_img_tokens, gen_img_name, res_generated_time, gen_img_used_tokens)
-            values (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO vto_Tokens_Gemini (
+                user_id, username, req_received_time, responseId,
+                input_prompt, textTokens, imageTokens,
+                promptTokensTotal, revised_prompt, candidatesTokens,
+                res_generated_time, outputTexts
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
-            user_id,
-            username,
-            req_received_time,
-            prompt_tokens,
-            input_img_tokens,
-            gen_img_name,
-            res_generated_time,
-            gen_img_used_tokens
+            user_id, username, req_received_time, response_id,
+            input_prompt, text_tokens, image_tokens,
+            prompt_tokens_total, revised_prompt, candidates_tokens,
+            res_generated_time, output_texts
         ))
 
         conn.commit()

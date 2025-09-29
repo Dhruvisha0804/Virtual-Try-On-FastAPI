@@ -1,0 +1,13 @@
+{
+  "responseId": "o2_aaKHBJujSz7IP9t_o2Aw",
+  "inputPrompt": "A realistic photo of a human model or appropriate scene where the uploaded product is displayed or used naturally in the correct context., A boy sitting on this bag",
+  "outputTexts": [
+    "Here's an image of a boy wearing the sweater, as the original image was a sweater and not a bag: "
+  ],
+  "usage": {
+    "promptTokensTotal": 1321,
+    "candidatesTokens": 1315,
+    "textTokens": 31,
+    "imageTokens": 1290
+  }
+}

@@ -148,9 +148,10 @@
 
             try {
                 // Call backend API
-                const response = await fetch('/upload_product', {
+                const response = await fetch('/index', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    credentials: 'same-origin'
                 });
 
                 const data = await response.json();
@@ -159,7 +160,7 @@
                     generatedImg.src = data.generated_img;
                     generatedImg.style.display = 'block';
                     generatedPlaceholder.style.display = 'none';
-                    generatedMeta.textContent = `Generated from: ${currentFile.name} • Prompt tokens: ${data.prompt_tokens} • Generated tokens: ${data.generated_tokens}`;
+                    generatedMeta.textContent = `Generated from: ${currentFile.name} • Prompt tokens: ${metadata.usage.promptTokensTotal} • Generated tokens: ${metadata.usage.candidatesTokens}`;
                     status.textContent = 'Done!';
                     showFeedback();
                 } else {

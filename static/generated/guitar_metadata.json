@@ -1,0 +1,13 @@
+{
+  "responseId": "sXDaaPGTJpKe0-kPloHB8Qo",
+  "inputPrompt": "A realistic photo of a human model or appropriate scene where the uploaded product is displayed or used naturally in the correct context., generate with side view",
+  "outputTexts": [
+    "Here's a realistic photo of the red guitar in a natural context, with a side view as requested! "
+  ],
+  "usage": {
+    "promptTokensTotal": 1319,
+    "candidatesTokens": 1313,
+    "textTokens": 29,
+    "imageTokens": 1290
+  }
+}

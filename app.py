@@ -4,7 +4,8 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
-# from fastapi.routing import APIRoute
+from fastapi.responses import HTMLResponse
+from fastapi import Request
 
 load_dotenv()
 

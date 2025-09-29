@@ -1,0 +1,13 @@
+{
+  "responseId": "tGvaaPKvNaP_2roPmpuB-Ao",
+  "inputPrompt": "A realistic photo of a human model or appropriate scene where the uploaded product is displayed or used naturally in the correct context., small little girl doing this",
+  "outputTexts": [
+    "Here's a realistic photo of a small little girl with the backpack: "
+  ],
+  "usage": {
+    "promptTokensTotal": 1320,
+    "candidatesTokens": 1306,
+    "textTokens": 30,
+    "imageTokens": 1290
+  }
+}

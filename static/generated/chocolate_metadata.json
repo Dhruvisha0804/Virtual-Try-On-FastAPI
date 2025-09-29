@@ -1,0 +1,13 @@
+{
+  "responseId": "rXHaaLjAAqP_2roPmpuB-Ao",
+  "inputPrompt": "A realistic photo of a human model or appropriate scene where the uploaded product is displayed or used naturally in the correct context., A boy sitting on this bag",
+  "outputTexts": [
+    "I can help with that! Here's a realistic photo of a boy sitting with the Hershey's chocolate bar. "
+  ],
+  "usage": {
+    "promptTokensTotal": 1321,
+    "candidatesTokens": 1315,
+    "textTokens": 31,
+    "imageTokens": 1290
+  }
+}

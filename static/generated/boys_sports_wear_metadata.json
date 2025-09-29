@@ -1,0 +1,13 @@
+{
+  "responseId": "lmPaaL30A97ZqtsPj9C-mQQ",
+  "inputPrompt": "A realistic photo of a human model or appropriate scene where the uploaded product is displayed or used naturally in the correct context., lady drinking coffee just next to lamp",
+  "outputTexts": [
+    "I can certainly help you with that! Here's a realistic image of a lady drinking coffee next to a lamp, featuring a product display within the scene to highlight your item naturally:\n\n"
+  ],
+  "usage": {
+    "promptTokensTotal": 1322,
+    "candidatesTokens": 1328,
+    "textTokens": 32,
+    "imageTokens": 1290
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "responseId": "e2faaP_gEZbUz7IPguyasAs",
+  "inputPrompt": "A realistic photo of a human model or appropriate scene where the uploaded product is displayed or used naturally in the correct context., change the background",
+  "outputTexts": [
+    "Absolutely! Here's the wooden duck toy displayed in a natural context with a new background. "
+  ],
+  "usage": {
+    "promptTokensTotal": 1318,
+    "candidatesTokens": 1310,
+    "textTokens": 28,
+    "imageTokens": 1290
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "responseId": "NWbaaK7vB77Uz7IPway6sQo",
+  "inputPrompt": "A realistic photo of a human model or appropriate scene where the uploaded product is displayed or used naturally in the correct context., change the background",
+  "outputTexts": [],
+  "usage": {
+    "promptTokensTotal": 1318,
+    "candidatesTokens": 1290,
+    "textTokens": 28,
+    "imageTokens": 1290
+  }
+}

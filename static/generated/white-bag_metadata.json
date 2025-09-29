@@ -1,0 +1,11 @@
+{
+  "responseId": "R23aaMadBIGN0-kP_6vo-A0",
+  "inputPrompt": "A realistic photo of a human model or appropriate scene where the uploaded product is displayed or used naturally in the correct context., A boy sitting on this bag",
+  "outputTexts": [],
+  "usage": {
+    "promptTokensTotal": 1321,
+    "candidatesTokens": 1290,
+    "textTokens": 31,
+    "imageTokens": 1290
+  }
+}

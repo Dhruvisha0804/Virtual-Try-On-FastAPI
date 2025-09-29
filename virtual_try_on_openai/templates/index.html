@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Virtual Try-On</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/index.css">
+</head>
+<body>
+    <div class="wrap">
+        <header>
+            <h1>AI Virtual Try-On</h1>
+            <p class="lead">Upload a photo of a product, and generate a realistic try-on result in few seconds.</p>
+        </header>
+
+        <main class="grid-container">
+            <section class="card upload-area" aria-labelledby="upload-title">
+                <h2 id="upload-title" class="content-heading">Your Product</h2>
+                <div class="image-box" id="previewBox">
+                    <span class="placeholder" id="previewPlaceholder">Choose to upload your product</span>
+                    <img id="previewImg" alt="Uploaded preview" />
+                </div>
+                <div class="file-input-wrapper">
+                    <label class="file-label" for="fileInput">Choose Product</label>
+                </div>
+                <input id="fileInput" type="file" accept="image/*" />
+                <div class="meta" id="fileMeta">Accepted: JPG, PNG. Max: 10MB.</div>
+
+                <div class="controls">
+                    <button id="runBtn" class="btn btn-primary" disabled>Run</button>
+                    <button id="resetBtn" class="btn btn-ghost">Reset</button>
+                    <button id="regenBtn" class="btn btn-primary">Regenerate</button>
+                </div>
+                <div class="status-area" id="status"></div>
+            </section>
+
+            <section class="card generated-area" aria-labelledby="output-title">
+                <h2 id="output-title" class="content-heading">Virtual Try-On Result</h2>
+                <div class="image-box" id="generatedBox">
+                    <span class="placeholder" id="generatedPlaceholder">Your generated image will appear here</span>
+                    <img id="generatedImg" alt="Generated output" />
+                </div>
+                <div class="meta" id="generatedMeta"></div>
+                    <div id="feedbackSection" style="margin-top: 15px; display:none;">
+                        <p>Is this result correct?</p>
+                        <button id="correctBtn" class="btn btn-primary">✅ Yes, correct</button>
+                        <button id="incorrectBtn" class="btn btn-ghost">❌ No, needs change</button>
+
+                        <div id="feedbackForm" style="display:none; margin-top:10px;">
+                            <textarea id="feedbackText" rows="2" placeholder="Describe what should be changed..."></textarea>
+                            <button id="submitFeedback" class="btn btn-primary" style="margin-top:8px;">Submit Feedback</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const previewImg = document.getElementById('previewImg');
+        const previewPlaceholder = document.getElementById('previewPlaceholder');
+        const runBtn = document.getElementById('runBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const regenBtn = document.getElementById('regenBtn');
+        const status = document.getElementById('status');
+        const feedbackSection = document.getElementById('feedbackSection');
+        const correctBtn = document.getElementById('correctBtn');
+        const incorrectBtn = document.getElementById('incorrectBtn');
+        const feedbackForm = document.getElementById('feedbackForm');
+        const feedbackText = document.getElementById('feedbackText');
+        const submitFeedback = document.getElementById('submitFeedback');
+
+        const generatedImg = document.getElementById('generatedImg');
+        const generatedPlaceholder = document.getElementById('generatedPlaceholder');
+        const generatedMeta = document.getElementById('generatedMeta');
+
+        let currentFile = null;
+
+        // Disable buttons initially
+        runBtn.disabled = true;
+        regenBtn.disabled = true;
+
+        // File upload handling
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return resetUpload();
+
+            if (!file.type.startsWith('image/')) {
+                status.textContent = 'Please select a valid image file.';
+                return;
+            }
+            if (file.size > 10 * 1024 * 1024) {
+                status.textContent = 'File too large. Max 10MB.';
+                return;
+            }
+
+            currentFile = file;
+            status.textContent = '';
+
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                previewImg.src = ev.target.result;
+                previewImg.style.display = 'block';
+                previewPlaceholder.style.display = 'none';
+                runBtn.disabled = false;
+                regenBtn.disabled = false;
+            };
+            reader.readAsDataURL(file);
+
+            document.getElementById('fileMeta').textContent = `Name: ${file.name} • ${(file.size / 1024 | 0)} KB`;
+        });
+
+        // Reset button
+        resetBtn.addEventListener('click', resetUpload);
+
+        function resetUpload() {
+            currentFile = null;
+            fileInput.value = '';
+            previewImg.src = '';
+            previewImg.style.display = 'none';
+            previewPlaceholder.style.display = 'block';
+            runBtn.disabled = true;
+            regenBtn.disabled = true;
+            status.textContent = '';
+
+            generatedImg.src = '';
+            generatedImg.style.display = 'none';
+            generatedPlaceholder.style.display = 'block';
+            generatedMeta.textContent = '';
+            document.getElementById('fileMeta').textContent = 'Accepted: JPG, PNG. Max: 10MB.';
+        }
+
+        // Function to handle AI generation (Run & Regenerate)
+        async function generateImage() {
+            if (!currentFile) return;
+
+            const formData = new FormData();
+            formData.append('file', currentFile);
+
+            runBtn.disabled = true;
+            regenBtn.disabled = true;
+            status.innerHTML = '<div class="spinner" aria-hidden="true"></div> Generating...';
+            generatedMeta.textContent = '';
+
+            try {
+                // Call backend API
+                const response = await fetch('/index', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'same-origin'
+                });
+
+                const data = await response.json();
+
+                if (data.generated_img) {
+                    generatedImg.src = data.generated_img;
+                    generatedImg.style.display = 'block';
+                    generatedPlaceholder.style.display = 'none';
+                    generatedMeta.textContent = `Generated from: ${currentFile.name} • Prompt tokens: ${data.prompt_tokens} • Generated tokens: ${data.generated_tokens}`;
+                    status.textContent = 'Done!';
+                    showFeedback();
+                } else {
+                    status.textContent = data.error || 'Generation failed';
+                }
+            } catch (err) {
+                status.textContent = 'Error connecting to server';
+                console.error(err);
+            } finally {
+                runBtn.disabled = false;
+                regenBtn.disabled = false;
+            }
+        }
+
+        // Attach generateImage to both buttons
+        runBtn.addEventListener('click', generateImage);
+        regenBtn.addEventListener('click', generateImage);
+
+        // Show feedback options after image generated
+        function showFeedback() {
+            feedbackSection.style.display = 'block';
+        }
+
+        // When user clicks Correct
+        correctBtn.addEventListener('click', () => {
+            alert("Thanks for your confirmation ✅");
+            feedbackSection.style.display = 'none';
+        });
+
+        // When user clicks Incorrect
+        incorrectBtn.addEventListener('click', () => {
+            feedbackForm.style.display = 'block';
+        });
+
+        // Submit feedback to backend
+        submitFeedback.addEventListener('click', async () => {
+            const note = feedbackText.value.trim();
+            if (!note) {
+                alert("Please enter what should be changed.");
+                return;
+            }
+
+            try {
+                const response = await fetch('/feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ note })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    status.textContent = "Regenerating with your feedback...";
+                    generateImage(); // regenerate again
+                } else {
+                    alert("Error: " + data.error);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Error sending feedback");
+            }
+        });
+    </script>
+
+</body>
+</html>

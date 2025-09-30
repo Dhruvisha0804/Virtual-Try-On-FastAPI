@@ -19,3 +19,14 @@ Base tokens = 85
 Tile tokens = 170
 
 
+Generation Payload: {
+  "imageData": {"url", "name"}, "Type": url/blob
+  "prompt": "ghuitfrg",
+  "background": "studio",
+  "dimension": "1:1",
+  "model": "female",
+  "format": "jpeg",
+  "age": "Young Adult",
+  "tone": "Tan"
+}
+

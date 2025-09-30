@@ -69,7 +69,10 @@ async def index_page(request: Request):
 
 
 @router.post('/index', response_class=HTMLResponse)
-async def upload_product(request: Request, file: UploadFile = File(...), db=Depends(get_db)):
+async def upload_product(request: Request,
+                         file: UploadFile = File(...),
+                         revised_prompt: str = Form(None),
+                         db=Depends(get_db)):
     if not allowed_file(file.filename):
         raise HTTPException(status_code=400, detail="File type not allowed.")
 
@@ -81,7 +84,15 @@ async def upload_product(request: Request, file: UploadFile = File(...), db=Depe
             buffer.write(await file.read())
 
         req_received_time = datetime.now()
-        prompt = request.session.get("last_prompt", universal_prompt)
+        # prompt = request.session.get("last_prompt", universal_prompt)
+        request.session['last_prompt'] = None
+        request.session['revised_prompt'] = None
+        # prompt = revised_prompt or universal_prompt
+        if revised_prompt:
+            prompt = f"{universal_prompt}, {revised_prompt}"
+        else:
+            prompt = universal_prompt
+
 
         with open(upload_path, "rb") as img_file:
             image_bytes = img_file.read()
@@ -102,7 +113,7 @@ async def upload_product(request: Request, file: UploadFile = File(...), db=Depe
         print("📌 Sending request to Gemini...")
         try:
             response = client.models.generate_content(
-                model="gemini-2.5-flash",
+                model="gemini-2.5-flash-image-preview",
                 contents=[prompt, product_image],
                 config=generation_config_dict
             )
@@ -182,9 +193,10 @@ async def upload_product(request: Request, file: UploadFile = File(...), db=Depe
                 text_tokens=metadata["usage"]["textTokens"],
                 image_tokens=metadata["usage"]["imageTokens"],
                 prompt_tokens_total=metadata["usage"]["promptTokensTotal"],
-                revised_prompt=None,
+                revised_prompt=revised_prompt,
                 candidates_tokens=metadata["usage"]["candidatesTokens"],
-                output_texts="\n".join(metadata.get("outputTexts", []))
+                output_texts="\n".join(metadata.get("outputTexts", [])),
+                gen_img_name=gen_img_name
             )
 
         except Exception as db_error:
@@ -212,10 +224,12 @@ async def feedback(payload: FeedbackRequest, request: Request):
             return JSONResponse({"success": False, "error": "Feedback note is empty"}, status_code=400)
 
         new_prompt = f"{universal_prompt}, {note}"
-        request.session['last_prompt'] = new_prompt
-        # request.session['revised_prompt'] = note
 
-        return {"success": True, "new_prompt": new_prompt}
+        return {
+            "success": True,
+            "new_prompt": new_prompt,
+            "note": note  # 👈 frontend can reuse this
+        }
 
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)

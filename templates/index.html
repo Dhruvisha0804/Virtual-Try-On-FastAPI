@@ -42,6 +42,9 @@
                 <div class="image-box" id="generatedBox">
                     <span class="placeholder" id="generatedPlaceholder">Your generated image will appear here</span>
                     <img id="generatedImg" alt="Generated output" />
+                    <span id="downloadIcon" style="display:none; position:absolute; top:8px; right:8px; cursor:pointer;">
+                        📥
+                    </span>
                 </div>
                 <div class="meta" id="generatedMeta"></div>
                     <div id="feedbackSection" style="margin-top: 15px; display:none;">
@@ -67,6 +70,7 @@
         const resetBtn = document.getElementById('resetBtn');
         const regenBtn = document.getElementById('regenBtn');
         const status = document.getElementById('status');
+        const downloadIcon = document.getElementById('downloadIcon');
         const feedbackSection = document.getElementById('feedbackSection');
         const correctBtn = document.getElementById('correctBtn');
         const incorrectBtn = document.getElementById('incorrectBtn');
@@ -135,11 +139,15 @@
         }
 
         // Function to handle AI generation (Run & Regenerate)
-        async function generateImage() {
+            async function generateImage(revised_prompt = null) {
             if (!currentFile) return;
 
             const formData = new FormData();
             formData.append('file', currentFile);
+
+            if (revised_prompt) {
+                formData.append('revised_prompt', feedbackText.value || "");
+            }
 
             runBtn.disabled = true;
             regenBtn.disabled = true;
@@ -147,12 +155,18 @@
             generatedMeta.textContent = '';
 
             try {
-                // Call backend API
                 const response = await fetch('/index', {
                     method: 'POST',
                     body: formData,
                     credentials: 'same-origin'
                 });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error("Server returned error:", response.status, errorText);
+                    status.textContent = `Server error: ${response.status}`;
+                    return;
+                }
 
                 const data = await response.json();
 
@@ -160,15 +174,16 @@
                     generatedImg.src = data.generated_img;
                     generatedImg.style.display = 'block';
                     generatedPlaceholder.style.display = 'none';
-                    generatedMeta.textContent = `Generated from: ${currentFile.name} • Prompt tokens: ${metadata.usage.promptTokensTotal} • Generated tokens: ${metadata.usage.candidatesTokens}`;
+                    generatedMeta.textContent = `Generated from: ${currentFile.name}`;
                     status.textContent = 'Done!';
-                    showFeedback();
+                    showFeedback(); // ✅ Show feedback section
+                    showDownloadIcon(); // ✅ Show the download button
                 } else {
                     status.textContent = data.error || 'Generation failed';
                 }
             } catch (err) {
+                console.error("Fetch error:", err);
                 status.textContent = 'Error connecting to server';
-                console.error(err);
             } finally {
                 runBtn.disabled = false;
                 regenBtn.disabled = false;
@@ -176,8 +191,10 @@
         }
 
         // Attach generateImage to both buttons
-        runBtn.addEventListener('click', generateImage);
-        regenBtn.addEventListener('click', generateImage);
+<!--        runBtn.addEventListener('click', generateImage);-->
+<!--        regenBtn.addEventListener('click', generateImage);-->
+        runBtn.addEventListener('click', () => generateImage());
+        regenBtn.addEventListener('click', () => generateImage());
 
         // Show feedback options after image generated
         function showFeedback() {
@@ -197,6 +214,8 @@
 
         // Submit feedback to backend
         submitFeedback.addEventListener('click', async () => {
+            event.preventDefault();
+
             const note = feedbackText.value.trim();
             if (!note) {
                 alert("Please enter what should be changed.");
@@ -204,15 +223,24 @@
             }
 
             try {
+                console.log("Sending feedback:", note);
                 const response = await fetch('/feedback', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ note })
                 });
+                console.log("Feedback response status:", response.status);
+
                 const data = await response.json();
+                console.log("Feedback response data:", data);
+
                 if (data.success) {
                     status.textContent = "Regenerating with your feedback...";
-                    generateImage(); // regenerate again
+                    feedbackForm.style.display = 'none';
+                    feedbackSection.style.display = 'none';
+
+                    await generateImage(note);
+
                 } else {
                     alert("Error: " + data.error);
                 }
@@ -220,6 +248,28 @@
                 console.error(err);
                 alert("Error sending feedback");
             }
+        });
+
+        function showDownloadIcon() {
+            if (generatedImg.src) {
+                downloadIcon.style.display = 'block';
+            } else {
+                downloadIcon.style.display = 'none';
+            }
+        }
+
+        downloadIcon.addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.href = generatedImg.src;
+
+            // Get original file name without extension
+            const originalName = currentFile ? currentFile.name.replace(/\.[^/.]+$/, "") : "generated_image";
+
+            // Add timestamp
+            const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+
+            link.download = `genai_${originalName}_${timestamp}.png`;
+            link.click();
         });
     </script>
 
